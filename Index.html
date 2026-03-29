@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NURS 339 | Reproductive Health - Advanced Quiz (120 Qs)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #eef2f7;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .quiz-container {
+            max-width: 950px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .creator-credit {
+            background: #f5e7d3;
+            color: #3a2c1f;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px solid #e0c8a8;
+        }
+        .quiz-header {
+            background: #0b2b40;
+            color: white;
+            padding: 18px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+        }
+        .quiz-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        .timer-area {
+            background: #00000033;
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.4rem;
+            font-family: monospace;
+        }
+        .timer-warning {
+            background: #c4450c;
+            animation: pulse 0.8s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .progress-badge {
+            background: #2c5a6e;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .question-area {
+            padding: 28px 28px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .question-text {
+            font-size: 1.45rem;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 24px;
+            color: #0a1e2c;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .option {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 100px;
+            padding: 11px 20px;
+            font-size: 0.98rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option:hover {
+            background: #eef2ff;
+            border-color: #2c7a7b;
+            transform: translateX(4px);
+        }
+        .option.selected {
+            background: #e0f2fe;
+            border-color: #0f5b6e;
+            font-weight: 600;
+        }
+        .option-prefix {
+            font-weight: 800;
+            background: #d9e2ef;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+        }
+        .selected .option-prefix {
+            background: #0f5b6e;
+            color: white;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 28px 28px;
+            gap: 15px;
+        }
+        button {
+            background: #1e6f5c;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: #0f4c3f;
+            transform: scale(0.97);
+        }
+        button:disabled {
+            background: #b9c8d1;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .prev-btn {
+            background: #4a6272;
+        }
+        .submit-area {
+            text-align: center;
+            padding: 8px 28px 28px;
+        }
+        .submit-btn {
+            background: #0b5e7e;
+            padding: 14px 32px;
+            font-size: 1.2rem;
+            width: 100%;
+        }
+        .result-card {
+            background: #f1f9fe;
+            margin: 20px 28px 28px;
+            border-radius: 28px;
+            padding: 22px;
+            text-align: center;
+            border-left: 8px solid #1e6f5c;
+        }
+        .score-big {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 12px 0;
+            color: #0b2b40;
+        }
+        .restart-btn {
+            background: #2c7a7b;
+            margin-top: 12px;
+            display: inline-block;
+            width: auto;
+            padding: 12px 28px;
+        }
+        footer {
+            font-size: 0.72rem;
+            text-align: center;
+            color: #5a6e7c;
+            padding: 18px;
+        }
+        @media (max-width: 620px) {
+            .question-text { font-size: 1.2rem; }
+            .option { padding: 8px 14px; }
+            .quiz-header { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container" id="quizRoot"></div>
+
+<script>
+    // 120 challenging questions for University of Ghana BSc Nursing Level 300
+    // Based on all NURS 339 reproductive health lecture content
+    // Timer = 60 minutes (half of 120)
+    const QUESTIONS = [
+        // 1-10: Reproductive Health Concepts & Indicators
+        { text: "The WHO definition of reproductive health emphasizes well-being 'in all matters relating to the reproductive system'. Which of the following best captures the holistic nature of this definition?", options: ["Absence of sexually transmitted infections and safe childbirth", "Complete physical, mental and social well-being, not merely absence of disease", "Ability to reproduce without any medical assistance", "Freedom from infertility and access to family planning"], correct: 1 },
+        { text: "Which of the following statements best distinguishes the Millennium Development Goals (MDGs) from the Sustainable Development Goals (SDGs) regarding reproductive health?", options: ["MDGs focused only on maternal mortality while SDGs added family planning", "MDGs addressed reproductive health indirectly, whereas SDGs include a specific target (3.7) for universal access", "MDGs emphasized population control; SDGs emphasize women's empowerment", "Both MDGs and SDGs had identical reproductive health targets"], correct: 1 },
+        { text: "A community health nurse is reviewing reproductive health indicators. Which combination of indicators would provide the most comprehensive assessment of a population's reproductive health status?", options: ["Total fertility rate and contraceptive prevalence rate", "Maternal mortality ratio, adolescent birth rate, and unmet need for family planning", "Life expectancy and infant mortality rate", "Perinatal mortality and low birth weight prevalence"], correct: 1 },
+        { text: "Which of the following is a key difference between maternal mortality ratio (MMR) and maternal mortality rate?", options: ["MMR uses live births as denominator; maternal mortality rate uses women of reproductive age", "MMR includes accidental deaths during pregnancy; rate does not", "MMR is expressed per 100,000; rate per 1,000 live births", "MMR measures risk per pregnancy; rate measures risk per woman-year"], correct: 0 },
+        { text: "A nurse working in a rural district observes that many pregnant women delay seeking care until late in pregnancy. This delay is best categorized under which component of the 'three delays' model?", options: ["Delay in recognizing complications", "Delay in decision to seek care", "Delay in reaching a health facility", "Delay in receiving quality care"], correct: 1 },
+        { text: "Which of the following statements about perinatal mortality is most accurate for program planning?", options: ["It includes stillbirths and early neonatal deaths, reflecting quality of obstetric and neonatal care", "It is calculated as deaths per 1,000 women of childbearing age", "It excludes stillbirths because they are not considered live births", "It is a direct measure of maternal nutrition status"], correct: 0 },
+        { text: "A health policy maker argues that reducing total fertility rate (TFR) is the only way to improve reproductive health. What is the most appropriate counterargument?", options: ["TFR does not reflect maternal mortality or morbidity", "Reducing TFR may lead to population aging and economic challenges", "Reproductive health encompasses broader dimensions including rights, satisfaction, and access beyond fertility reduction", "TFR is not influenced by family planning programs"], correct: 2 },
+        { text: "Which of the following is a correct interpretation of low birth weight (LBW) as a reproductive health indicator?", options: ["LBW is a direct measure of maternal nutritional status and newborn care", "LBW is primarily a genetic condition unrelated to health services", "LBW is only useful in high-income countries", "LBW reflects intrapartum care quality but not antenatal care"], correct: 0 },
+        { text: "The concept of 'reproductive rights' as articulated in the ICPD Programme of Action includes all of the following EXCEPT:", options: ["The right to decide freely the number and spacing of children", "The right to access safe, effective, affordable contraception", "The right to have children regardless of health status", "The right to access appropriate health care for safe pregnancy"], correct: 2 },
+        { text: "A nurse is educating a community about the importance of safe motherhood. Which statement best reflects the 'skilled attendant at birth' strategy?", options: ["Any person trained to assist during childbirth, including traditional birth attendants, is acceptable", "A health professional with midwifery skills who can manage normal births and recognize complications", "Only obstetricians should attend births to ensure safety", "The presence of any female relative during delivery is sufficient"], correct: 1 },
+        // 11-20: Population Dynamics & Demography
+        { text: "A country is experiencing a demographic transition from stage 2 to stage 3. Which of the following changes would you expect to observe first?", options: ["Decline in death rate followed by decline in birth rate", "Simultaneous decline in both birth and death rates", "Rapid increase in birth rate and decline in death rate", "Increase in death rate due to aging population"], correct: 0 },
+        { text: "The age structure diagram of Ghana shows a broad base and a narrowing top. This pattern indicates:", options: ["A high dependency ratio with potential for future population growth", "A stable population with low fertility and mortality", "A declining population with fewer young people", "An aging population with high life expectancy"], correct: 0 },
+        { text: "Which of the following is a limitation of using crude birth rate (CBR) as a measure of fertility?", options: ["It does not account for age-sex composition of the population", "It is difficult to calculate accurately", "It only measures births to married women", "It includes stillbirths in the numerator"], correct: 0 },
+        { text: "A researcher is studying migration patterns. Which term best describes the movement of individuals from a rural village to a town, then to a city, and eventually abroad?", options: ["Step migration", "Chain migration", "Circular migration", "Forced migration"], correct: 0 },
+        { text: "Urbanization can have both positive and negative effects on reproductive health. Which of the following is a documented negative effect?", options: ["Better access to family planning services", "Higher risk of unhealthy lifestyles and slum conditions", "Increased educational opportunities for women", "Improved sanitation and water supply"], correct: 1 },
+        { text: "The concept of 'carrying capacity' in population studies refers to:", options: ["The maximum population size an environment can sustain indefinitely", "The number of people that can be supported by existing infrastructure", "The average number of children per family", "The rate at which population grows"], correct: 0 },
+        { text: "Which of the following factors is most directly associated with a decline in total fertility rate (TFR) in developing countries over the past 50 years?", options: ["Decreased infant mortality and increased female education", "Increased urbanization alone", "Government policies restricting family size", "Climate change affecting agricultural productivity"], correct: 0 },
+        { text: "A demographer notes that a country's population is stable with a TFR around 2.1. Which stage of demographic transition does this represent?", options: ["Preindustrial stage", "Transitional stage", "Industrial stage", "Postindustrial stage"], correct: 3 },
+        { text: "Which of the following is an example of a 'pull factor' that might influence internal migration?", options: ["Civil war in the home region", "Drought and food scarcity", "Better employment opportunities in a city", "High crime rates in the current location"], correct: 2 },
+        { text: "What is the primary reason that empowering women through education and employment is an effective strategy for slowing population growth?", options: ["Educated women tend to marry earlier and have more children", "Education reduces women's decision-making power", "Educated women have greater autonomy, later marriage, and desire fewer children", "Education directly reduces fertility through biological mechanisms"], correct: 2 },
+        // 21-30: Puberty & Adolescent Development
+        { text: "A 13-year-old boy presents with concerns about nocturnal emissions. Which of the following is the most appropriate response?", options: ["Explain that this is spermarche, a normal sign of sexual maturity", "Reassure that it indicates a hormonal imbalance requiring treatment", "Advise that this will stop once he reaches full height", "Suggest that he avoid sexual thoughts to prevent further emissions"], correct: 0 },
+        { text: "A nurse is assessing a 15-year-old girl who is distressed because she is taller and more developed than her peers. Which psychological concept best explains her distress?", options: ["Imaginary audience", "Personal fable", "Assumption of invulnerability", "Cognitive egocentrism"], correct: 0 },
+        { text: "According to Kohlberg's theory, a 14-year-old who follows rules because she wants to be seen as a 'good girl' by her parents and teachers is operating at which level of moral reasoning?", options: ["Preconventional", "Conventional", "Postconventional", "Principled"], correct: 1 },
+        { text: "A 17-year-old male engages in risky driving behaviors, believing that 'it won't happen to me.' This cognitive distortion is known as:", options: ["Imaginary audience", "Personal fable", "Invulnerability fallacy", "Concrete thinking"], correct: 1 },
+        { text: "Which of the following hormonal changes is primarily responsible for the adolescent growth spurt in boys?", options: ["Estrogen surge", "Testosterone surge", "Progesterone increase", "FSH elevation"], correct: 1 },
+        { text: "A 12-year-old girl has not yet started menstruating, while her peers have. She is anxious and asks if something is wrong. The nurse's best response is:", options: ["She likely has a hormonal disorder requiring immediate evaluation", "Menarche typically occurs between 10-16 years; she is within normal range", "She must be at least 14 before any concerns arise", "She should start estrogen therapy to induce puberty"], correct: 1 },
+        { text: "During a health education session, a nurse explains Tanner staging. A 14-year-old boy has sparse, slightly curled hair at the base of the penis. According to Tanner, this corresponds to:", options: ["Stage II", "Stage III", "Stage IV", "Stage V"], correct: 0 },
+        { text: "Which of the following best describes the psychosocial task of middle adolescence (15-16 years)?", options: ["Establishing autonomy from family", "Solidifying sexual identity and career goals", "Developing concrete operational thinking", "Resolving identity versus role confusion"], correct: 0 },
+        { text: "A nurse is counseling a 16-year-old who recently became sexually active. The adolescent states, 'I know I won't get pregnant because I'm not ready to be a mother.' This statement reflects:", options: ["Realistic assessment of risk", "Assumption of invulnerability", "Postconventional morality", "Healthy self-esteem"], correct: 1 },
+        { text: "Which of the following factors most significantly contributes to the vulnerability of early-maturing girls?", options: ["Increased risk of depression, substance use, and earlier sexual debut", "Greater peer acceptance and higher self-esteem", "Delayed cognitive development", "Decreased risk of eating disorders"], correct: 0 },
+        // 31-40: Determinants of Adolescent Health & Vulnerabilities
+        { text: "A 14-year-old girl is brought to the clinic by her mother because of weight loss, fatigue, and missed periods. The nurse suspects an eating disorder. Which of the following determinants of adolescent health is most relevant?", options: ["Biological", "Behavioral and sociocultural", "Environmental", "Political"], correct: 1 },
+        { text: "Which of the following is an example of an emotional vulnerability in adolescence that increases the risk of sexual coercion?", options: ["Lack of assertiveness and communication skills", "Poor nutrition leading to stunted growth", "Early marriage due to poverty", "Exposure to environmental toxins"], correct: 0 },
+        { text: "A nurse is designing a program to reduce adolescent substance abuse. Based on the lectures, which approach is likely to be most effective?", options: ["Strict punishment for drug use", "Life skills education combined with peer support", "Isolating at-risk youth from peers", "Mandatory drug testing in schools"], correct: 1 },
+        { text: "Which of the following statements about adolescent risky behaviors is supported by the lecture content?", options: ["Adolescents engage in risky behaviors primarily due to lack of knowledge", "Risk-taking is a normative part of adolescent development and can be mediated by life skills", "Risky behaviors are always pathological and require clinical intervention", "Adolescents are generally aware of risks and avoid them intentionally"], correct: 1 },
+        { text: "A 15-year-old boy is brought to the emergency department after a motorcycle accident without a helmet. The nurse notes that he has a history of similar risky behaviors. This scenario illustrates which type of adolescent vulnerability?", options: ["Physical vulnerability due to poor nutrition", "Emotional vulnerability related to mental health", "Socioeconomic vulnerability from poverty", "Physical vulnerability from injury-prone behaviors"], correct: 3 },
+        { text: "Which of the following is a known consequence of early marriage for adolescent girls in developing countries?", options: ["Reduced risk of STIs due to monogamy", "Increased likelihood of school completion", "Higher risk of obstetric fistula and maternal mortality", "Greater autonomy in reproductive decision-making"], correct: 2 },
+        { text: "A school nurse is concerned about a cluster of students using marijuana. Which of the following is a known risk factor for adolescent substance use according to the vulnerabilities lecture?", options: ["Strong parental monitoring", "High academic achievement", "Peer pressure and belongingness", "Regular physical activity"], correct: 2 },
+        { text: "The lecture on adolescent vulnerabilities states that adolescents often do not act in their own best interests. This is primarily because:", options: ["They have lower IQ than adults", "The prefrontal cortex is still developing, affecting impulse control and decision-making", "They lack education about risks", "They are influenced by media only"], correct: 1 },
+        { text: "Which of the following strategies is most effective in addressing the 'delay in reaching care' component of the three delays model for adolescents?", options: ["Providing free transportation vouchers", "Establishing youth-friendly clinics in accessible locations", "Educating parents about danger signs", "Training traditional birth attendants"], correct: 1 },
+        { text: "A community health nurse is implementing a program to reduce adolescent STIs. Which intervention aligns with the life skills approach?", options: ["Providing free condoms only", "Teaching communication skills to negotiate safer sex and resist peer pressure", "Mandating parental consent for STI treatment", "Focusing exclusively on abstinence"], correct: 1 },
+        // 41-50: Adolescent Behaviour & Life Skills
+        { text: "According to the lecture, which of the following best explains the relationship between perceptions and behavior?", options: ["Perceptions are genetically determined and unchangeable", "Perceptions are beliefs that influence interpretation of events and subsequently drive behavior", "Perceptions have no effect on behavior in adolescents", "Perceptions are solely based on emotional states"], correct: 1 },
+        { text: "A 16-year-old is struggling with peer pressure to drink alcohol. Which life skill would most directly help him resist this pressure?", options: ["Critical thinking", "Effective communication and assertiveness", "Creative thinking", "Coping with stress"], correct: 1 },
+        { text: "The WHO recommends ten core life skills. Which of the following is an example of a skill that helps adolescents recognize their strengths and weaknesses?", options: ["Empathy", "Self-awareness", "Problem solving", "Decision making"], correct: 1 },
+        { text: "A nurse is facilitating a life skills group for adolescents. One participant says, 'I never know what to do when my friends are fighting.' Which skill is most relevant to address this?", options: ["Coping with emotions", "Interpersonal relationship skills", "Decision making", "Critical thinking"], correct: 2 },
+        { text: "Which of the following is a component of creative thinking that involves building on other ideas?", options: ["Fluency", "Flexibility", "Originality", "Elaboration"], correct: 3 },
+        { text: "A 14-year-old girl reports feeling overwhelmed with school, family expectations, and social pressures. The nurse suggests stress management techniques. Which life skill is being promoted?", options: ["Coping with stress", "Coping with emotions", "Self-awareness", "Empathy"], correct: 0 },
+        { text: "According to the lecture, emotions are described as the 'physiological representation of the state of the body and mind.' This means emotions:", options: ["Are purely psychological experiences", "Involve both mental and bodily responses", "Are always conscious and deliberate", "Are only triggered by external events"], correct: 1 },
+        { text: "Which of the following is a key difference between emotions and feelings as presented in the session?", options: ["Emotions are subjective; feelings are physiological", "Emotions are physiological; feelings are subjective interpretations", "Emotions are always negative; feelings are positive", "There is no difference; the terms are interchangeable"], correct: 1 },
+        { text: "A nurse working with adolescents emphasizes the importance of 'empathy' in their interpersonal relationships. Empathy primarily helps adolescents to:", options: ["Understand others' perspectives and improve social interactions", "Control their own emotions better", "Make decisions without external input", "Avoid conflicts altogether"], correct: 0 },
+        { text: "Which life skill is described as 'the ability to analyze situations in an objective manner to assess factors that influence attitudes and behavior'?", options: ["Creative thinking", "Critical thinking", "Problem solving", "Decision making"], correct: 1 },
+        // 51-60: Family Planning (Traditional & Natural)
+        { text: "A couple wants to use the sympto-thermal method of natural family planning. Which combination of observations provides the most accurate identification of the fertile window?", options: ["Basal body temperature rise alone", "Cervical mucus changes alone", "Calendar calculation based on 6 previous cycles", "Basal body temperature, cervical mucus, and calendar formula"], correct: 3 },
+        { text: "The Lactational Amenorrhea Method (LAM) is 98% effective when all three criteria are met. Which of the following scenarios would maintain LAM's effectiveness?", options: ["Baby is 5 months old, exclusively breastfed, and mother has no return of menses", "Baby is 7 months old, exclusively breastfed, and mother has spotting", "Baby is 4 months old, breastfed with occasional formula, and no menses", "Baby is 3 months old, exclusively breastfed, but mother reports light bleeding"], correct: 0 },
+        { text: "A woman asks about the calendar (rhythm) method. Which of the following is a major limitation of this method?", options: ["It requires daily temperature measurement", "It is only effective for women with regular cycles", "It requires abstinence during the entire cycle", "It has no scientific basis"], correct: 1 },
+        { text: "Which physiological event triggers the rise in basal body temperature that indicates ovulation has occurred?", options: ["FSH surge", "LH surge", "Progesterone increase after ovulation", "Estrogen peak"], correct: 2 },
+        { text: "A woman is considering natural family planning but is unsure about its effectiveness. The nurse explains that the correct use effectiveness of the sympto-thermal method is approximately:", options: ["80%", "90%", "95%", "99%"], correct: 3 },
+        { text: "Which of the following statements about coitus interruptus (withdrawal) is accurate?", options: ["It is a highly effective modern method", "It has lower efficacy due to pre-ejaculate sperm and imperfect use", "It is a permanent method of contraception", "It provides protection against STIs"], correct: 1 },
+        { text: "A breastfeeding mother who gave birth 4 months ago and has not resumed menstruation asks about contraceptive options. She wants to avoid hormones. Which method would be most appropriate and effective for her at this time?", options: ["Combined oral contraceptive", "Copper IUD", "LAM if she meets criteria", "Diaphragm"], correct: 2 },
+        { text: "The physiological basis of LAM involves:", options: ["Suppression of ovulation due to prolactin and suckling stimulus", "Thickening of cervical mucus from estrogen", "Alteration of uterine lining preventing implantation", "Inhibition of FSH by placental hormones"], correct: 0 },
+        { text: "A couple using natural family planning notes that the woman has clear, stretchy, slippery cervical mucus. This indicates:", options: ["Infertile phase", "Peak fertility", "Implantation", "Menstruation"], correct: 1 },
+        { text: "Which of the following is an advantage of natural family planning methods over modern contraceptives?", options: ["They are 100% effective", "They require no user motivation", "They have no side effects and promote partner communication", "They protect against STIs"], correct: 2 },
+        // 61-70: Modern Contraceptives
+        { text: "A 22-year-old woman requests a contraceptive method that is long-acting, reversible, and does not contain estrogen. Which of the following meets all these criteria?", options: ["Combined oral contraceptive pill", "Copper IUD", "Contraceptive implant", "Depo-Provera injection"], correct: 2 },
+        { text: "A woman using combined oral contraceptives (COCs) reports occasional breakthrough bleeding. The most appropriate nursing response is:", options: ["Discontinue the pills immediately", "This is a common side effect, especially in the first few months", "Switch to a progestin-only pill", "Take two pills to compensate"], correct: 1 },
+        { text: "Which of the following is a contraindication to combined oral contraceptive use?", options: ["History of migraine without aura", "Breastfeeding a 6-month-old", "Current deep vein thrombosis", "Obesity"], correct: 2 },
+        { text: "A woman using Depo-Provera for 2 years is concerned about bone mineral density. What is the current evidence-based recommendation?", options: ["Depo-Provera is contraindicated for more than 6 months", "Bone loss is usually reversible after discontinuation; consider calcium and vitamin D", "All users must have annual DEXA scans", "Depo-Provera does not affect bone density"], correct: 1 },
+        { text: "A 19-year-old had unprotected intercourse 48 hours ago and requests emergency contraception. Which option is most effective?", options: ["Copper IUD insertion within 5 days", "Two doses of levonorgestrel 1.5 mg", "Combined oral contraceptives using Yuzpe regimen", "Vaginal spermicide"], correct: 0 },
+        { text: "A man is considering vasectomy. Which statement accurately reflects this procedure?", options: ["It immediately protects against pregnancy", "It is reversible in most cases", "It does not affect ejaculation or sexual function", "It increases the risk of prostate cancer"], correct: 2 },
+        { text: "A woman presents for IUD insertion. She asks about the mechanism of action of the copper IUD. The nurse correctly explains that it primarily:", options: ["Prevents ovulation", "Thickens cervical mucus", "Creates a spermicidal environment and prevents implantation", "Alters the endometrium permanently"], correct: 2 },
+        { text: "Which of the following is a benefit of the contraceptive implant (e.g., Jadelle, Implanon) compared to combined oral contraceptives?", options: ["It provides protection against STIs", "It does not require user compliance and has a very low failure rate", "It is reversible and can be removed by the user", "It contains estrogen which improves skin"], correct: 1 },
+        { text: "A woman using combined oral contraceptives starts a course of rifampin for tuberculosis. What should the nurse advise?", options: ["Continue the pill as usual", "Use a backup method during rifampin treatment", "Discontinue the pill permanently", "Double the pill dose"], correct: 1 },
+        { text: "Which of the following is a potential side effect of the copper IUD?", options: ["Weight gain", "Increased menstrual bleeding and cramping", "Acne", "Mood swings"], correct: 1 },
+        // 71-80: Youth Friendly Services
+        { text: "A nurse is evaluating whether a clinic qualifies as 'youth-friendly.' Which of the following attributes is most critical according to the lecture?", options: ["Separate entrance for youth", "Staff trained in adolescent development and non-judgmental communication", "Free services", "Extended hours on weekends"], correct: 1 },
+        { text: "Which of the following is a documented reason why adolescents avoid mainstream reproductive health services?", options: ["Services are too expensive", "Fear that parents may find out and breach of confidentiality", "They prefer adult-oriented settings", "They have no need for reproductive health services"], correct: 1 },
+        { text: "A 16-year-old presents to a youth-friendly clinic requesting STI testing. She is accompanied by her mother. What is the most appropriate first step?", options: ["Ask the mother to leave to ensure privacy and confidentiality", "Proceed with testing in the mother's presence", "Refuse service until the mother provides consent", "Explain that testing requires parental consent"], correct: 0 },
+        { text: "Which of the following groups is considered 'youth with special needs' in the context of reproductive health services?", options: ["Adolescents in school", "Street youth and commercial sex workers", "Male adolescents", "Adolescents from urban areas"], correct: 1 },
+        { text: "A nurse is designing a youth-friendly health service. Which program design characteristic is essential?", options: ["Involve youth in planning and feedback", "Charge fees to ensure sustainability", "Limit services to one gender", "Require appointments weeks in advance"], correct: 0 },
+        { text: "Which of the following is a fundamental principle of youth-friendly services?", options: ["All youth have identical needs", "Gender inequalities do not affect health", "Services should be holistic, addressing physical, mental, and social well-being", "Community support is unnecessary"], correct: 2 },
+        { text: "A 14-year-old girl visits a clinic seeking contraceptive information but does not want her parents to know. According to Ghana's adolescent health guidelines, what is the nurse's ethical obligation?", options: ["Inform the parents immediately", "Respect confidentiality unless there is a risk of serious harm", "Refuse to provide services without parental consent", "Report to school authorities"], correct: 1 },
+        { text: "Which of the following is an operational barrier that prevents adolescents from accessing reproductive health services?", options: ["Lack of knowledge about services", "High cost of services", "Inconvenient clinic hours", "All of the above"], correct: 3 },
+        { text: "A nurse notes that few male adolescents use the youth-friendly clinic. Which strategy could increase male attendance?", options: ["Offer services only for females", "Provide male-friendly information and involve male peer educators", "Require parental consent for males", "Reduce clinic hours"], correct: 1 },
+        { text: "Which of the following is an example of a policy constraint that limits adolescent access to reproductive health services?", options: ["Laws requiring parental consent for contraception", "Clinic operating hours", "Distance to clinic", "Lack of trained staff"], correct: 0 },
+        // 81-90: Counseling
+        { text: "A client is considering tubal ligation. The counselor uses the GATHER approach. What is the purpose of the 'Help' step?", options: ["Help the client choose a method after discussing options", "Help the client schedule the procedure", "Help the client understand the risks", "Help the client pay for services"], correct: 0 },
+        { text: "During a counseling session, the client says, 'I feel like I'm the only one going through this.' The counselor responds, 'Many women your age face similar challenges; you are not alone.' This response demonstrates which cognitive factor for change?", options: ["Insight", "Modeling", "Universalization", "Acceptance"], correct: 2 },
+        { text: "Which of the following is an affective factor that promotes change in counseling?", options: ["Reality testing", "Ventilation", "Unconditional positive regard", "Interaction"], correct: 2 },
+        { text: "A counselor notices that the client is avoiding eye contact and giving short answers. The most appropriate counselor response is:", options: ["Continue with the session as planned", "Directly ask why the client is avoiding eye contact", "Use open-ended questions and explore comfort level", "End the session early"], correct: 2 },
+        { text: "Which of the following is NOT a universal verbal skill for counseling?", options: ["Active listening", "Paraphrasing", "Prescribing", "Clarification"], correct: 2 },
+        { text: "In the GATHER model, what is the purpose of the 'Return' step?", options: ["To schedule a follow-up visit and discuss any issues", "To ask the client to return the contraceptive method", "To ensure the client returns the counseling form", "To give a reminder to return next year"], correct: 0 },
+        { text: "A client is considering sterilization and is worried about regret. The counselor's best response is:", options: ["Reassure that regret is rare", "Explore the client's feelings, ensure informed decision-making, and discuss alternative methods", "Advise against sterilization", "Refer to another counselor"], correct: 1 },
+        { text: "Which of the following demonstrates effective use of the 'Tell' step in contraceptive counseling?", options: ["Provide detailed information about all methods at once", "Tailor information to the client's expressed needs and ask about preferences", "Tell the client which method is best", "Avoid discussing side effects to prevent anxiety"], correct: 1 },
+        { text: "A client says, 'I'm afraid the pill will make me gain weight.' The counselor's most appropriate response is:", options: ["Weight gain is a possible side effect; we can discuss other options if this concerns you", "Weight gain does not happen with the pill", "You should not worry about that", "All contraceptives cause weight gain"], correct: 0 },
+        { text: "Which of the following is a characteristic of an effective counselor?", options: ["Authoritative and directive", "Sincere, non-judgmental, and empathetic", "Detached and objective only", "Focuses solely on medical facts"], correct: 1 },
+        // 91-100: Safe Motherhood
+        { text: "A pregnant woman presents to the antenatal clinic at 32 weeks with no prior visits. According to focused antenatal care (FANC), what is the priority?", options: ["Schedule weekly visits until delivery", "Conduct a comprehensive assessment and develop a birth plan", "Admit for observation", "Refer to a traditional birth attendant"], correct: 1 },
+        { text: "Which of the following is a key strategy to reduce maternal mortality within the 'delay in receiving treatment' domain?", options: ["Improving road infrastructure", "Community education on danger signs", "Ensuring facilities have skilled staff, supplies, and emergency protocols", "Providing transport vouchers"], correct: 2 },
+        { text: "A woman has a history of two previous cesarean sections and is pregnant again. This pregnancy would be classified as:", options: ["Low risk", "High risk requiring specialized care", "Normal", "Eligible for home birth"], correct: 1 },
+        { text: "Which of the following is a component of the 'clean/safe delivery' pillar of safe motherhood?", options: ["Ensuring all birth attendants have skills for clean delivery and postpartum care", "Providing family planning before pregnancy", "Detecting complications early", "Treating obstetric emergencies"], correct: 0 },
+        { text: "WHO recommends pregnancy spacing of at least 2 years after a live birth. Which of the following best explains the rationale?", options: ["To allow the mother's body to recover and reduce risks of adverse outcomes", "To ensure the mother can return to work", "To align with cultural practices", "To reduce fertility rates"], correct: 0 },
+        { text: "A nurse is reviewing the 'three delays' model with community health volunteers. Which delay is most influenced by the presence of a skilled birth attendant?", options: ["Delay in decision to seek care", "Delay in reaching a facility", "Delay in receiving quality care at facility", "All delays are equally affected"], correct: 2 },
+        { text: "Which of the following is an example of a direct cause of maternal death?", options: ["Malaria during pregnancy", "Anemia", "Obstructed labor", "HIV/AIDS"], correct: 2 },
+        { text: "A woman in labor arrives at a health facility after 12 hours of obstructed labor. The facility lacks surgical capacity. According to safe motherhood principles, what should happen?", options: ["Attempt delivery by vacuum extraction", "Stabilize and refer urgently to a comprehensive emergency obstetric care facility", "Administer oxytocin and wait", "Send the woman home to deliver with a traditional birth attendant"], correct: 1 },
+        { text: "Which of the following is a benefit of focused antenatal care (FANC) over traditional routine antenatal care?", options: ["More frequent visits", "Individualized care and fewer visits for low-risk women", "Mandatory hospitalization", "Focus only on nutrition"], correct: 1 },
+        { text: "A community health nurse is educating pregnant women about danger signs. Which sign would indicate the need for immediate referral?", options: ["Mild edema", "Vaginal bleeding", "Frequent urination", "Heartburn"], correct: 1 },
+        // 101-110: Integrating Concepts – Clinical Scenarios
+        { text: "A 17-year-old presents with amenorrhea for 3 months, weight loss, and intense fear of gaining weight. She denies sexual activity. The most appropriate initial action is:", options: ["Pregnancy test", "Screen for eating disorder and refer for mental health support", "Prescribe combined oral contraceptives to regulate cycles", "Advise her to eat more and return in 3 months"], correct: 1 },
+        { text: "A 15-year-old boy is brought to the clinic by his mother because he has become withdrawn, irritable, and his grades have dropped. The nurse should first consider:", options: ["Normal adolescent behavior; no intervention needed", "Possible depression, substance use, or bullying; assess further", "Immediate psychiatric hospitalization", "Attention deficit disorder"], correct: 1 },
+        { text: "A 13-year-old girl asks about the HPV vaccine. The nurse explains that it protects against:", options: ["All STIs", "Most cases of cervical cancer and genital warts", "HIV transmission", "Pregnancy"], correct: 1 },
+        { text: "A 16-year-old is newly diagnosed with chlamydia. She is asymptomatic and reports one sexual partner in the past 3 months. Which of the following is essential?", options: ["Treat only the patient", "Treat the patient and recommend partner notification and treatment", "Report to authorities", "Hospitalize for IV antibiotics"], correct: 1 },
+        { text: "A nurse is counseling a couple using the withdrawal method. The woman states they have been using it for 2 years without pregnancy but now wants to be more effective. Which method would be most appropriate to discuss?", options: ["Natural family planning", "Long-acting reversible contraceptive (LARC)", "Fertility awareness", "Continue withdrawal"], correct: 1 },
+        { text: "A 14-year-old girl discloses that her uncle has been touching her inappropriately. The nurse's immediate priority is:", options: ["Maintain confidentiality and not tell anyone", "Ensure safety, report to child protection authorities as per mandatory reporting laws", "Confront the uncle", "Counsel her to avoid the uncle"], correct: 1 },
+        { text: "A woman using a copper IUD for 3 years presents with heavy menstrual bleeding and dysmenorrhea. She asks if these are normal. The nurse responds:", options: ["These are common side effects; consider NSAIDs and follow up", "The IUD should be removed immediately", "These indicate a serious infection", "She should switch to a hormonal IUD"], correct: 0 },
+        { text: "A 22-year-old with no contraindications desires a method that she can use without her partner's knowledge. Which method would best meet her needs?", options: ["Male condom", "Depo-Provera injection or implant", "Vasectomy", "Diaphragm"], correct: 1 },
+        { text: "A 17-year-old requests emergency contraception after a condom broke. She has had unprotected intercourse 72 hours ago. Which is the most effective option available?", options: ["Levonorgestrel 1.5 mg", "Copper IUD if within 5 days", "Yuzpe regimen", "Combined oral contraceptives"], correct: 1 },
+        { text: "A community health nurse is implementing a life skills program for out-of-school adolescents. Which topic should be prioritized to address the highest risk behaviors?", options: ["Creative thinking", "Coping with stress and emotions, decision-making about substance use and sexual health", "Fluency and flexibility", "Financial literacy"], correct: 1 },
+        // 111-120: Advanced Synthesis & Critical Thinking
+        { text: "A nurse is evaluating a youth-friendly clinic's effectiveness. Which indicator would best measure whether services are 'youth-friendly' in practice?", options: ["Number of youth attending at least once", "Retention rate and satisfaction among youth clients", "Number of methods available", "Cost of services"], correct: 1 },
+        { text: "Which of the following statements best integrates the concepts of adolescent vulnerabilities and life skills education?", options: ["Life skills education is ineffective because vulnerabilities are biological", "Life skills education addresses psychosocial competencies that can mitigate vulnerabilities by enhancing decision-making and coping", "Vulnerabilities are fixed and cannot be changed", "Life skills education should focus only on preventing pregnancy"], correct: 1 },
+        { text: "A 15-year-old girl who is 10 weeks pregnant is considering abortion where it is legal. Which of the following is the most appropriate counseling approach?", options: ["Advise against abortion based on personal beliefs", "Provide non-directive counseling on all options, including continuing pregnancy, adoption, and safe abortion services", "Immediately refer to an adoption agency", "Tell her she must inform her parents"], correct: 1 },
+        { text: "A nurse is training peer educators on reproductive health. Which topic is essential for enabling them to effectively address myths about contraceptives?", options: ["Only contraceptive methods", "Critical thinking and factual information about method safety and effectiveness", "How to distribute condoms", "Sexual positions"], correct: 1 },
+        { text: "A woman who is 6 weeks postpartum and exclusively breastfeeding wants a contraceptive method that will not affect her milk supply. Which method is contraindicated?", options: ["Progestin-only pill", "LAM", "Copper IUD", "Combined oral contraceptive"], correct: 3 },
+        { text: "A nurse is advocating for inclusion of comprehensive sexuality education in schools. Which argument aligns with evidence presented in the course?", options: ["Sexuality education increases sexual activity", "Comprehensive sexuality education delays sexual debut and reduces risky behaviors", "Only abstinence education is effective", "Parents should be the only source of information"], correct: 1 },
+        { text: "A 19-year-old with multiple sexual partners requests an IUD. The nurse should counsel that:", options: ["IUDs are not recommended for women with multiple partners due to increased PID risk", "IUDs are safe but regular STI screening is important; copper IUD is non-hormonal", "IUDs are contraindicated", "She must first be monogamous for 6 months"], correct: 1 },
+        { text: "Which of the following is a key ethical principle in adolescent reproductive health care?", options: ["Parental consent is always required", "Confidentiality should be maintained except when there is risk of serious harm", "Adolescents cannot make their own health decisions", "Only married adolescents have rights"], correct: 1 },
+        { text: "A woman with a history of gestational diabetes is seeking family planning. Which method might be preferred due to its metabolic neutrality?", options: ["Combined oral contraceptive", "Copper IUD", "Depo-Provera", "Contraceptive patch"], correct: 1 },
+        { text: "The course materials emphasize that 'adolescence is a period of opportunities and risks.' Which statement best captures the role of the nurse in this context?", options: ["Focus only on preventing risks", "Support adolescents in developing skills to navigate both opportunities and risks, promoting healthy development", "Isolate adolescents from risks", "Leave all decisions to parents"], correct: 1 }
+    ];
+
+    const TOTAL_QS = 120;
+    const TIME_SECONDS = (TOTAL_QS / 2) * 60; // 60 minutes
+    const INIT_TIME = TIME_SECONDS;
+
+    let currentIndex = 0;
+    let userAnswers = new Array(TOTAL_QS).fill(null);
+    let quizActive = true;
+    let timerInterval = null;
+    let timeLeft = INIT_TIME;
+    let quizFinished = false;
+
+    const root = document.getElementById('quizRoot');
+
+    function formatTime(sec) {
+        const mins = Math.floor(sec / 60);
+        const remainSec = sec % 60;
+        return `${mins.toString().padStart(2,'0')}:${remainSec.toString().padStart(2,'0')}`;
+    }
+
+    function stopTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    function startTimer() {
+        if (timerInterval) stopTimer();
+        timerInterval = setInterval(() => {
+            if (!quizActive || quizFinished) return;
+            if (timeLeft <= 1) {
+                if (!quizFinished) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    quizFinished = true;
+                    quizActive = false;
+                    showResultsPage(true);
+                }
+            } else {
+                timeLeft--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const timerSpan = document.getElementById('liveTimer');
+        if (timerSpan) {
+            timerSpan.innerText = formatTime(timeLeft);
+            if (timeLeft <= 60) timerSpan.classList.add('timer-warning');
+            else timerSpan.classList.remove('timer-warning');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderQuestion() {
+        if (!quizActive || quizFinished) return;
+        const q = QUESTIONS[currentIndex];
+        const selectedIdx = userAnswers[currentIndex];
+        const progressHtml = `<div class="progress-badge">Question ${currentIndex+1} of ${TOTAL_QS}</div>`;
+        
+        let optionsHtml = '';
+        const letters = ['A', 'B', 'C', 'D'];
+        q.options.forEach((opt, idx) => {
+            const isSelected = (selectedIdx === idx);
+            const selectedClass = isSelected ? 'selected' : '';
+            optionsHtml += `
+                <div class="option ${selectedClass}" data-opt-index="${idx}">
+                    <span class="option-prefix">${letters[idx]}</span>
+                    <span>${escapeHtml(opt)}</span>
+                </div>
+            `;
+        });
+
+        const mainHtml = `
+            <div class="creator-credit">
+                ✨ Created by <strong>Andrews 'Cobby' Boateng</strong> ✨ | University of Ghana | BSc Nursing Level 300 | Advanced Quiz
+            </div>
+            <div class="quiz-header">
+                <div class="quiz-title">📘 NURS 339 · Reproductive Health (120 Advanced Qs)</div>
+                <div class="timer-area">⏱️ <span id="liveTimer">${formatTime(timeLeft)}</span></div>
+                ${progressHtml}
+            </div>
+            <div class="question-area">
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                <div class="options-list" id="optionsContainer">
+                    ${optionsHtml}
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}>◀️ Previous</button>
+                <button id="nextBtn">${currentIndex === TOTAL_QS-1 ? 'Review & Finish' : 'Next ▶️'}</button>
+            </div>
+            ${currentIndex === TOTAL_QS-1 ? '<div class="submit-area"><button class="submit-btn" id="finalSubmitBtn">✅ SUBMIT QUIZ</button></div>' : ''}
+            <footer>⏲️ Time: 60 minutes. Each question requires critical thinking. UG Level 300 standard.</footer>
+        `;
+        root.innerHTML = mainHtml;
+
+        document.querySelectorAll('.option').forEach(optDiv => {
+            optDiv.addEventListener('click', () => {
+                if (!quizActive || quizFinished) return;
+                const idx = parseInt(optDiv.dataset.optIndex);
+                if (!isNaN(idx)) {
+                    userAnswers[currentIndex] = idx;
+                    renderQuestion();
+                }
+            });
+        });
+
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (!quizActive || quizFinished) return;
+                if (currentIndex < TOTAL_QS - 1) {
+                    currentIndex++;
+                    renderQuestion();
+                }
+            });
+        }
+        const prevBtn = document.getElementById('prevBtn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (!quizActive || quizFinished) return;
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderQuestion();
+                }
+            });
+        }
+        const finalSubmit = document.getElementById('finalSubmitBtn');
+        if (finalSubmit) {
+            finalSubmit.addEventListener('click', () => {
+                if (!quizActive || quizFinished) return;
+                quizFinished = true;
+                quizActive = false;
+                stopTimer();
+                showResultsPage(false);
+            });
+        }
+    }
+
+    function showResultsPage(isTimeout = false) {
+        stopTimer();
+        let score = 0;
+        for (let i = 0; i < TOTAL_QS; i++) {
+            if (userAnswers[i] !== null && userAnswers[i] === QUESTIONS[i].correct) score++;
+        }
+        const percent = Math.round((score / TOTAL_QS) * 100);
+        let message = isTimeout ? "⏰ TIME'S UP! Quiz auto-submitted." : "✅ Quiz submitted.";
+
+        let feedbackLines = '';
+        for (let i = 0; i < TOTAL_QS; i++) {
+            const userChoice = userAnswers[i];
+            const isCorrect = (userChoice !== null && userChoice === QUESTIONS[i].correct);
+            const correctLetter = String.fromCharCode(65 + QUESTIONS[i].correct);
+            const correctText = QUESTIONS[i].options[QUESTIONS[i].correct];
+            let userText = (userChoice !== null) ? QUESTIONS[i].options[userChoice] : 'No answer';
+            if (isCorrect) {
+                feedbackLines += `<div style="margin-bottom: 10px; background:#e6f7ec; padding: 8px 12px; border-radius: 16px;"><span style="font-weight:bold;">${i+1}. ✓ Correct</span><br>${escapeHtml(QUESTIONS[i].text)}<br><span style="font-size:0.85rem;">Your answer: ${escapeHtml(userText)}</span></div>`;
+            } else {
+                feedbackLines += `<div style="margin-bottom: 10px; background:#fff0f0; padding: 8px 12px; border-radius: 16px;"><span style="font-weight:bold;">${i+1}. ✗ Incorrect</span><br>${escapeHtml(QUESTIONS[i].text)}<br><span style="font-size:0.85rem;">Your answer: ${escapeHtml(userText)}</span><br><span style="font-size:0.85rem; color:#116b4e;">Correct: ${escapeHtml(correctText)} (${correctLetter})</span></div>`;
+            }
+        }
+
+        const resultHtml = `
+            <div class="creator-credit">
+                ✨ Created by <strong>Andrews 'Cobby' Boateng</strong> ✨ | University of Ghana | BSc Nursing Level 300
+            </div>
+            <div class="quiz-header">
+                <div class="quiz-title">📊 Quiz Results (120 questions)</div>
+                <div class="timer-area">⏱️ Finished</div>
+            </div>
+            <div class="result-card">
+                <div style="font-size:1.4rem;">${message}</div>
+                <div class="score-big">${score} / ${TOTAL_QS}</div>
+                <div style="font-size:1.2rem;">Score: ${percent}%</div>
+                <button class="restart-btn" id="restartQuizBtn">⟳ Restart Quiz</button>
+            </div>
+            <div style="padding: 10px 28px 20px;">
+                <h3>📋 Detailed Review</h3>
+                <div style="max-height: 500px; overflow-y: auto; padding-right: 8px;">
+                    ${feedbackLines}
+                </div>
+            </div>
+            <footer>Advanced questions based on NURS 339 lectures. Level 300 standard.</footer>
+        `;
+        root.innerHTML = resultHtml;
+        const restartBtn = document.getElementById('restartQuizBtn');
+        if (restartBtn) restartBtn.addEventListener('click', () => resetAndRestart());
+    }
+
+    function resetAndRestart() {
+        stopTimer();
+        currentIndex = 0;
+        userAnswers = new Array(TOTAL_QS).fill(null);
+        quizActive = true;
+        quizFinished = false;
+        timeLeft = INIT_TIME;
+        startTimer();
+        renderQuestion();
+    }
+
+    function initQuiz() {
+        quizActive = true;
+        quizFinished = false;
+        timeLeft = INIT_TIME;
+        userAnswers.fill(null);
+        currentIndex = 0;
+        startTimer();
+        renderQuestion();
+    }
+
+    initQuiz();
+</script>
+</body>
+</html>
